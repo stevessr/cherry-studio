@@ -171,6 +171,21 @@ export default class AnthropicProvider extends BaseProvider {
       userMessagesParams.push(await this.getMessageParam(message))
     }
 
+    const lastMessage = userMessagesParams.findLast((m) => m.role === 'user')
+    if (lastMessage) {
+      if (typeof lastMessage.content === 'string') {
+        lastMessage.content = [
+          {
+            type: 'text',
+            text: lastMessage.content,
+            cache_control: { type: 'ephemeral' }
+          }
+        ]
+      } else if (Array.isArray(lastMessage.content)) {
+        lastMessage.content[lastMessage.content.length - 1]['cache_control'] = { type: 'ephemeral' }
+      }
+    }
+
     const userMessages = flatten(userMessagesParams)
     const lastUserMessage = _messages.findLast((m) => m.role === 'user')
     // const tools = mcpTools ? mcpToolsToAnthropicTools(mcpTools) : undefined
@@ -187,7 +202,13 @@ export default class AnthropicProvider extends BaseProvider {
       max_tokens: maxTokens || DEFAULT_MAX_TOKENS,
       temperature: this.getTemperature(assistant, model),
       top_p: this.getTopP(assistant, model),
-      system: systemPrompt,
+      system: [
+        {
+          type: 'text',
+          text: systemPrompt,
+          cache_control: { type: 'ephemeral' }
+        }
+      ],
       // @ts-ignore thinking
       thinking: this.getReasoningEffort(assistant, model),
       ...this.getCustomParameters(assistant)
@@ -299,7 +320,13 @@ export default class AnthropicProvider extends BaseProvider {
 
                 userMessages.push({
                   role: 'user',
-                  content: toolResults.join('\n')
+                  content: [
+                    {
+                      type: 'text',
+                      text: toolResults.join('\n'),
+                      cache_control: { type: 'ephemeral' }
+                    }
+                  ]
                 })
                 const newBody = body
                 newBody.messages = userMessages
