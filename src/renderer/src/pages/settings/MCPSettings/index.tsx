@@ -69,7 +69,10 @@ const MCPSettings: FC = () => {
     if (route === 'npx-search' || isEmpty(mcpServers)) {
       return (
         <SettingContainer theme={theme}>
-          <NpxSearch />
+          <NpxSearch
+            setRoute={(route) => setRoute(route as 'npx-search' | 'mcp-install' | null)}
+            setSelectedMcpServer={setSelectedMcpServer}
+          />
         </SettingContainer>
       )
     }
@@ -85,7 +88,12 @@ const MCPSettings: FC = () => {
       return <McpSettings server={selectedMcpServer} />
     }
 
-    return <NpxSearch />
+    return (
+      <NpxSearch
+        setRoute={(route) => setRoute(route as 'npx-search' | 'mcp-install' | null)}
+        setSelectedMcpServer={setSelectedMcpServer}
+      />
+    )
   }, [mcpServers, route, selectedMcpServer, theme])
 
   const goBackToGrid = () => {
@@ -136,9 +144,8 @@ const MCPSettings: FC = () => {
                   </StatusIndicator>
                 </ServerHeader>
                 <ServerDescription>
-                  {server.description
-                    ? server.description.substring(0, 60) + (server.description.length > 60 ? '...' : '')
-                    : t('settings.mcp.noDescription')}
+                  {server.description &&
+                    server.description.substring(0, 60) + (server.description.length > 60 ? '...' : '')}
                 </ServerDescription>
               </ServerCard>
             ))}
