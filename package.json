@@ -124,7 +124,7 @@
     "@google/genai": "patch:@google/genai@npm%3A0.8.0#~/.yarn/patches/@google-genai-npm-0.8.0-450d0d9a7d.patch",
     "@hello-pangea/dnd": "^16.6.0",
     "@kangfenmao/keyv-storage": "^0.1.0",
-    "@modelcontextprotocol/sdk": "^1.9.0",
+    "@modelcontextprotocol/sdk": "^1.10.2",
     "@notionhq/client": "^2.2.15",
     "@reduxjs/toolkit": "^2.2.5",
     "@sentry/react": "^9.13.0",
