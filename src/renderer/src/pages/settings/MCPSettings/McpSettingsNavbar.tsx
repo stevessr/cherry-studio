@@ -1,23 +1,22 @@
 import { NavbarRight } from '@renderer/components/app/Navbar'
 import { HStack } from '@renderer/components/Layout'
 import { isWindows } from '@renderer/config/constant'
-import { Button, Dropdown, type MenuProps } from 'antd'
+import { Button, Dropdown, Menu, type MenuProps } from 'antd'
 import { ChevronDown, Search } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router'
-import styled from 'styled-components'
 
 import InstallNpxUv from './InstallNpxUv'
 
 const mcpResources = [
   {
-    name: 'Model Context Protocol servers',
+    name: 'Model Context Protocol Servers',
     url: 'https://github.com/modelcontextprotocol/servers',
     logo: 'https://avatars.githubusercontent.com/u/182288589'
   },
   {
     name: 'Awesome MCP Servers',
-    url: 'https://awesome-mcp-servers.com',
+    url: 'https://github.com/punkpeye/awesome-mcp-servers',
     logo: 'https://github.githubassets.com/assets/github-logo-55c5b9a1fe52.png'
   },
   {
@@ -52,7 +51,7 @@ const mcpResources = [
   },
   {
     name: 'mcp.composio.dev',
-    url: 'https://www.composio.dev/',
+    url: 'https://mcp.composio.dev/',
     logo: 'https://composio.dev/wp-content/uploads/2025/02/Fevicon-composio.png'
   }
 ]
@@ -61,17 +60,16 @@ export const McpSettingsNavbar = () => {
   const { t } = useTranslation()
   const navigate = useNavigate()
 
-  const handleMenuClick = (url: string) => {
-    window.open(url, '_blank')
-  }
-
-  const resourceMenuItems: MenuProps['items'] = mcpResources.map((resource) => ({
-    key: resource.name,
+  const resourceMenuItems: MenuProps['items'] = mcpResources.map(({ name, url, logo }) => ({
+    key: name,
     label: (
-      <ResourceMenuItem onClick={() => handleMenuClick(resource.url)}>
-        <ResourceLogo src={resource.logo} alt={resource.name} />
-        {resource.name}
-      </ResourceMenuItem>
+      <Menu.Item
+        key={name}
+        onClick={() => window.open(url, '_blank', 'noopener,noreferrer')}
+        style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
+        <img src={logo} alt={name} style={{ width: 16, height: 16, borderRadius: 3, marginRight: 8 }} />
+        {name}
+      </Menu.Item>
     )
   }))
 
@@ -91,37 +89,17 @@ export const McpSettingsNavbar = () => {
           menu={{ items: resourceMenuItems }}
           trigger={['click']}
           overlayStyle={{ maxHeight: '400px', overflow: 'auto' }}>
-          <ResourcesButton
+          <Button
             size="small"
             type="text"
             className="nodrag"
-            style={{ fontSize: 13, height: 28, borderRadius: 20 }}>
+            style={{ fontSize: 13, height: 28, borderRadius: 20, display: 'flex', alignItems: 'center' }}>
             {t('settings.mcp.findMore')}
             <ChevronDown size={14} style={{ marginLeft: 5 }} />
-          </ResourcesButton>
+          </Button>
         </Dropdown>
         <InstallNpxUv mini />
       </HStack>
     </NavbarRight>
   )
 }
-
-const ResourcesButton = styled(Button)`
-  display: flex;
-  align-items: center;
-`
-
-const ResourceMenuItem = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 4px 0;
-  cursor: pointer;
-`
-
-const ResourceLogo = styled.img`
-  width: 16px;
-  height: 16px;
-  object-fit: contain;
-  border-radius: 3px;
-`
