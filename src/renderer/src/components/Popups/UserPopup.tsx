@@ -6,7 +6,7 @@ import ImageStorage from '@renderer/services/ImageStorage'
 import { useAppDispatch } from '@renderer/store'
 import { setAvatar } from '@renderer/store/runtime'
 import { setUserName } from '@renderer/store/settings'
-import { compressImage, isEmoji } from '@renderer/utils'
+import { compressImage, downloadImageFromUrl, isEmoji, isValidImageUrl } from '@renderer/utils'
 import { Avatar, Dropdown, Input, Modal, Popover, Upload } from 'antd'
 import React, { useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -24,6 +24,9 @@ const PopupContainer: React.FC<Props> = ({ resolve }) => {
   const [open, setOpen] = useState(true)
   const [emojiPickerOpen, setEmojiPickerOpen] = useState(false)
   const [dropdownOpen, setDropdownOpen] = useState(false)
+  const [urlInputVisible, setUrlInputVisible] = useState(false)
+  const [imageUrl, setImageUrl] = useState('')
+  const [urlLoading, setUrlLoading] = useState(false)
   const { t } = useTranslation()
   const { userName } = useSettings()
   const dispatch = useAppDispatch()
@@ -59,6 +62,34 @@ const PopupContainer: React.FC<Props> = ({ resolve }) => {
       setDropdownOpen(false)
     } catch (error: any) {
       window.message.error(error.message)
+    }
+  }
+
+  const handleUrlSubmit = async () => {
+    if (!imageUrl.trim()) {
+      window.message.error(t('settings.general.avatar.url_required'))
+      return
+    }
+
+    if (!isValidImageUrl(imageUrl)) {
+      window.message.error(t('settings.general.avatar.invalid_url'))
+      return
+    }
+
+    setUrlLoading(true)
+    try {
+      const base64Image = await downloadImageFromUrl(imageUrl)
+      await ImageStorage.set('avatar', base64Image)
+      dispatch(setAvatar(base64Image))
+      setUrlInputVisible(false)
+      setImageUrl('')
+      setDropdownOpen(false)
+      window.message.success(t('settings.general.avatar.url_success'))
+    } catch (error: any) {
+      console.error('Error setting avatar from URL:', error)
+      window.message.error(t('settings.general.avatar.url_error'))
+    } finally {
+      setUrlLoading(false)
     }
   }
   const items = [
@@ -102,6 +133,20 @@ const PopupContainer: React.FC<Props> = ({ resolve }) => {
             setDropdownOpen(false)
           }}>
           {t('settings.general.emoji_picker')}
+        </div>
+      )
+    },
+    {
+      key: 'url',
+      label: (
+        <div
+          style={{ width: '100%', textAlign: 'center' }}
+          onClick={(e) => {
+            e.stopPropagation()
+            setUrlInputVisible(true)
+            setDropdownOpen(false)
+          }}>
+          {t('settings.general.avatar.url_input')}
         </div>
       )
     },
@@ -175,6 +220,47 @@ const PopupContainer: React.FC<Props> = ({ resolve }) => {
           maxLength={30}
         />
       </HStack>
+      {urlInputVisible && (
+        <VStack gap="10px" p="0 20px 20px">
+          <Input
+            placeholder={t('settings.general.avatar.url_placeholder')}
+            value={imageUrl}
+            onChange={(e) => setImageUrl(e.target.value.trim())}
+            onPressEnter={handleUrlSubmit}
+            style={{ width: '100%' }}
+          />
+          <HStack gap="10px" justifyContent="center">
+            <button
+              onClick={handleUrlSubmit}
+              disabled={urlLoading || !imageUrl.trim()}
+              style={{
+                padding: '4px 12px',
+                border: '1px solid #d9d9d9',
+                borderRadius: '6px',
+                background: urlLoading || !imageUrl.trim() ? '#f5f5f5' : '#1890ff',
+                color: urlLoading || !imageUrl.trim() ? '#999' : '#fff',
+                cursor: urlLoading || !imageUrl.trim() ? 'not-allowed' : 'pointer'
+              }}>
+              {urlLoading ? t('common.loading') : t('common.confirm')}
+            </button>
+            <button
+              onClick={() => {
+                setUrlInputVisible(false)
+                setImageUrl('')
+              }}
+              style={{
+                padding: '4px 12px',
+                border: '1px solid #d9d9d9',
+                borderRadius: '6px',
+                background: '#fff',
+                color: '#666',
+                cursor: 'pointer'
+              }}>
+              {t('common.cancel')}
+            </button>
+          </HStack>
+        </VStack>
+      )}
     </Modal>
   )
 }
