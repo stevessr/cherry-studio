@@ -11,9 +11,6 @@ type LlmSettings = {
   lmstudio: {
     keepAliveTime: number
   }
-  gpustack: {
-    keepAliveTime: number
-  }
   vertexai: {
     serviceAccount: {
       privateKey: string

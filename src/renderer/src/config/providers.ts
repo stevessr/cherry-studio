@@ -13,8 +13,6 @@ import SiliconFlowProviderLogo from '@renderer/assets/images/providers/silicon.p
 import VertexAIProviderLogo from '@renderer/assets/images/providers/vertexai.svg'
 import ZhipuProviderLogo from '@renderer/assets/images/providers/zhipu.png'
 
-import { TOKENFLUX_HOST } from './constant'
-
 const PROVIDER_LOGO_MAP = {
   openai: OpenAiProviderLogo,
   silicon: SiliconFlowProviderLogo,
